@@ -9,17 +9,17 @@
 ### END INIT INFO
 
 #! /bin/sh
-# /etc/init.d/poll
+# /etc/init.d/control
 
 # To activate:
 #   cd /etc/init.d
-#   sudo ln -s ~/pi-doorbell/init-poll poll
-#   sudo update-rc.d poll defaults
+#   sudo ln -s ~/pi-controlbox/init-control control
+#   sudo update-rc.d control defaults
 #
 
-DAEMON_PATH="/home/pi/pi-doorbell"
+DAEMON_PATH="/home/pi/pi-controlbox"
 
-DAEMON=poll.py
+DAEMON=control.py
 
 NAME=poll
 DESC="My daemon description"
