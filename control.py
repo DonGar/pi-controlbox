@@ -6,11 +6,11 @@ import urllib
 import RPi.GPIO as GPIO
 
 BUTTON_URL = {
-  7: 'http://www:8080/button?id=doorbell',
-  11: 'http://www:8080/button?id=system1',
-  13: 'http://www:8080/button?id=system2',
-  15: 'http://www:8080/button?id=system3',
-  8: 'http://www:8080/button?id=system4',
+  7: 'http://www:8080/button?id=system1',
+  11: 'http://www:8080/button?id=system2',
+  13: 'http://www:8080/button?id=system3',
+  15: 'http://www:8080/button?id=system4',
+  8: 'http://www:8080/button?id=doorbell',
 }
 
 BUTTON_PINS = BUTTON_URL.keys()
@@ -18,7 +18,7 @@ BUTTON_LIGHT = {7: 10, 11: 16, 13: 18, 15: 22}
 LIGHT_PINS = BUTTON_LIGHT.values()
 
 BUTTON_DOWN = {}
-LIGHT_ON = {}
+LIGHT_ON = {10: False, 11: False, 18: False, 22: False}
 
 def button_pushed(pin):
   print 'Button down!: %d' % pin
