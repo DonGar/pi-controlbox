@@ -6,11 +6,11 @@ import urllib
 import RPi.GPIO as GPIO
 
 BUTTON_URL = {
-  7: 'http://www:8080/doorbell',
-  11: 'http://www:8080/doorbell',
-  13: 'http://www:8080/doorbell',
-  15: 'http://www:8080/doorbell',
-  8: 'http://www:8080/doorbell',
+  7: 'http://www:8080/button?id=doorbell',
+  11: 'http://www:8080/button?id=system1',
+  13: 'http://www:8080/button?id=system2',
+  15: 'http://www:8080/button?id=system3',
+  8: 'http://www:8080/button?id=system4',
 }
 
 BUTTON_PINS = BUTTON_URL.keys()
