@@ -22,16 +22,27 @@ LIGHT_ON = {10: False, 11: False, 18: False, 22: False}
 
 def button_pushed(pin):
   print 'Button down!: %d' % pin
-  f = urllib.urlopen(BUTTON_URL[pin])
-  f.read()
-  f.close()
+
+  on_off = ''
 
   if pin in BUTTON_LIGHT:
     light_pin = BUTTON_LIGHT[pin]
+
+    # Request a change to the oposite of the current state.
+    if light_pin:
+      on_off = '&action=off'
+    else:
+      on_off = '&action=on'
+
     # Notice that GPIO setting is False for light, True for dark.
     gpio_setting = LIGHT_ON[light_pin]
     GPIO.output(light_pin, gpio_setting)
     LIGHT_ON[light_pin] = not gpio_setting
+
+  url = BUTTON_URL[pin] + on_off
+  f = urllib.urlopen(url)
+  f.read()
+  f.close()
 
 def main():
   GPIO.setmode(GPIO.BOARD)
