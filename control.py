@@ -7,9 +7,9 @@ import RPi.GPIO as GPIO
 import notify
 
 BUTTON_URL = {
-  7: 'http://www:8080/button?id=control_red',
-  11: 'http://www:8080/button?id=control_black',
-  8: 'http://www:8080/button?id=doorbell',
+  7: 'http://www:8080/button/control_red',
+  11: 'http://www:8080/button/control_black',
+  8: 'http://www:8080/button/doorbell',
 }
 
 BUTTON_PINS = BUTTON_URL.keys()
