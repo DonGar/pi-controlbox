@@ -1,14 +1,23 @@
 /*
+ *  The sketch controls a four button block with RGB leds under each button as well as reads three other buttons via
+ *  analog in pins.
+ *
+ *  It communicates about the current state, and receives updates to the color state via serial over USB.
  */
 
 // Button Grounds
-const int buttonMatrix[] = { 13, 4, 8, 6 };
+const int buttonMatrix[] = { 2, 4, 6, 8 };
 
 // LED Grounds
-const int ledGnd[] = { 12, 3, 7, 5 };
+const int ledGnd[] = { 3, 5, 7, 12 };
 
 // RGB pins
 const int ledPwr[] = { 9, 10, 11 };
+
+// Analog Buttons, not part of 4 button device.
+//   Doorbell, Ctrl Black, Ctrl Red
+const int analogButton[] = { 0, 1, 2 };
+const boolean analogInvert[] = { false, false, true };
 
 // Colour definitions
 //   white:  true, true, true
@@ -18,7 +27,9 @@ const int ledPwr[] = { 9, 10, 11 };
 //   yellow: true, true, false
 //   dark:   false, false, false
 
-boolean buttonState[] = { false, false, false, false };
+// 0, 1, 2, 3 - Four Button Block
+// 4, 5, 6 - Analog Buttons
+boolean buttonState[] = { false, false, false, false, false, false, false };
 
 boolean buttonColor[4][3] = { {false, false, false},
                               {false, false, false},
@@ -35,7 +46,7 @@ void setup()
 {
   // Switch Grounds
   for (int i = 0; i < 4; i++) {
-    pinMode(buttonMatrix[i], INPUT);
+    pinMode(buttonMatrix[i], INPUT_PULLUP);
   }
 
   // Led grounds
@@ -98,11 +109,11 @@ void serialEvent() {
 void loop() {
   boolean stateChanged = false;
 
-  // Cycle through our four buttons in order.
+  // Cycle through our digital buttons looking for a change.
   for (int i = 0; i < 4; i++) {
 
-    // Read the button.
-    boolean buttonRead = digitalRead(buttonMatrix[i]);
+    // Read the button, and invert value (LOW for pushed).Â
+    boolean buttonRead = !digitalRead(buttonMatrix[i]);
 
     // If that button changed, remember it, and report it.
     if (buttonState[i] != buttonRead) {
@@ -111,30 +122,46 @@ void loop() {
     }
   }
 
+  // Cycle through our analog buttons looking for a change.
+  for (int i = 0; i < 3; i++) {
+    int value = analogRead(analogButton[i]);
+
+    // value ranges between 0 - 1023. We expect it to be near one extreme or the other
+    // to represent button pushed.
+    boolean buttonRead = value > 512;
+
+    // Some buttons go low when pushed, not high. Invert results.
+    buttonRead = buttonRead ^ analogInvert[i];
+
+    if (buttonState[i+4] != buttonRead) {
+      buttonState[i+4] = buttonRead;
+      stateChanged = true;
+    }
+  }
+
   if (stateChanged) {
     reportState();
-    
+
     if (buttonState[0] && buttonState[1] && buttonState[2] && buttonState[3])
       runDiagnostic();
   }
 
-  // Pass in the colour of your buttons 1, 2, 3, and 4.
-  //ledColour(yellow, red, purple, green);
+  // Redraw our colors.
   ledColor(buttonColor);
 }
 
 void reportState() {
-    Serial.print("{\n");
+    Serial.print("{ ");
 
-    Serial.print("  \"buttons\": [");
-    for (int i = 0; i < 4; i++) {
+    Serial.print("\"buttons\": [");
+    for (int i = 0; i < 7; i++) {
       Serial.print(buttonState[i]);
-      if (i < 3)
+      if (i < 6)
         Serial.print(", ");
     }
-    Serial.print("]\n");
+    Serial.print("], ");
 
-    Serial.print("  \"colors\": [");
+    Serial.print("\"colors\": [");
     // Write out each LED.
     for (int i = 0; i < 4; i++) {
       Serial.print('[');
@@ -149,8 +176,7 @@ void reportState() {
         Serial.print(", ");
     }
 
-    Serial.print("]\n");
-    Serial.print("}\n");
+    Serial.print("] }\n");
 }
 
 void runDiagnostic()
@@ -164,28 +190,28 @@ void runDiagnostic()
                                      {true, false, false},
                                      {true, false, false},
                                      {true, false, false} },
-  
+
                                    { {false, true, false},
                                      {false, true, false},
                                      {false, true, false},
                                      {false, true, false} },
-  
+
                                    { {false, false, true},
                                      {false, false, true},
                                      {false, false, true},
                                      {false, false, true} },
-  
+
                                    { {true, false, false},
                                      {false, true, false},
                                      {false, false, true},
                                      {true, true, false} } };
-  
+
   for (int i = 0; i < 5; i++) {
     unsigned long endTime = millis() + 400;
     while (millis() < endTime) {
       ledColor(flashColors[i]);
     }
-  }  
+  }
 }
 
 
