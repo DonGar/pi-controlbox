@@ -28,7 +28,7 @@ const boolean analogInvert[] = { false, false, true };
 //   dark:   false, false, false
 
 // 0, 1, 2, 3 - Four Button Block
-// 4, 5, 6 - Analog Buttons
+// 4, 5, 6 - Analog Buttons (red, black, doorbell)
 boolean buttonState[] = { false, false, false, false, false, false, false };
 
 boolean buttonColor[4][3] = { {false, false, false},
@@ -169,6 +169,8 @@ void reportState() {
       // Write each Color. Red, Green, Blue.
       for (int j = 0; j < 3; j++) {
         Serial.print(buttonColor[i][j]);
+        if (j < 2)
+          Serial.print(", ");
       }
 
       Serial.print(']');
