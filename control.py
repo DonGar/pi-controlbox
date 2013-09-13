@@ -10,7 +10,7 @@ import serial_process
 # import RPi.GPIO as GPIO
 
 SERIAL_PORT = '/dev/ttyUSB0'
-SERVER_URL = 'http://www:8081/'
+SERVER_URL = 'http://www:8080/'
 ADAPTER_URL = os.path.join(SERVER_URL, 'status/control')
 
 BUTTONS = ('block_2',
