@@ -3,4 +3,4 @@
 cd `dirname $0`
 
 source bin/activate
-python ./server.py 2>&1
+python ./control.py 2>&1
