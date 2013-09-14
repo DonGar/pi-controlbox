@@ -26,8 +26,9 @@ class WebAdapterWatcher(multiprocessing.Process):
           revision = rj['revision']
           self.output.put(rj)
 
-      except requests.exceptions:
+      except requests.ConnectionError:
         # If we got an error back from the server, wait a bit and try again.
+        print 'Got a ConnectionError. Retrying shortly.'
         time.sleep(0.5)
 
 class WebAdapterUpdater(object):
