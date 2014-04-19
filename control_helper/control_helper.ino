@@ -164,16 +164,15 @@ void reportState() {
     Serial.print("\"colors\": [");
     // Write out each LED.
     for (int i = 0; i < 4; i++) {
-      Serial.print('[');
-
+      Serial.print('"');
       // Write each Color. Red, Green, Blue.
       for (int j = 0; j < 3; j++) {
         Serial.print(buttonColor[i][j]);
         if (j < 2)
-          Serial.print(", ");
+          Serial.print(",");
       }
+      Serial.print('"');
 
-      Serial.print(']');
       if (i < 3)
         Serial.print(", ");
     }

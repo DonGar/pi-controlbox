@@ -1,17 +1,15 @@
-#!/usr/bin/python
 
-import multiprocessing
 import serial
 import time
 
-class SerialProcess(multiprocessing.Process):
+import adapter
+
+class Connection(adapter.ConnectionBase):
+  """Talk over the serial port."""
 
   def __init__(self, serial_port):
-    super(SerialProcess, self).__init__()
-
+    super(Connection, self).__init__()
     self._serial_port = serial_port
-    self.input = multiprocessing.Queue()
-    self.output = multiprocessing.Queue()
 
   def run(self):
     # Outer loop iterates if the serial connection is lost and reconnects.
@@ -24,11 +22,11 @@ class SerialProcess(multiprocessing.Process):
             # This read will timeout if there is nothing to read.
             msg = s.readline().strip()
             if msg:
-              self.output.put(msg)
+              self._connection.send(msg)
 
-            if not self.input.empty():
-              msg = self.input.get()
-              s.write(msg)
+            if self._connection.poll():
+              msg = self._connection.recv()
+              s.write(bytes(msg))
 
       except serial.SerialException:
         print 'Serial connection lost, retrying....'
