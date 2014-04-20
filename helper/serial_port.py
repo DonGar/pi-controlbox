@@ -2,13 +2,13 @@
 import serial
 import time
 
-import adapter
+import helper
 
-class Connection(adapter.ConnectionBase):
+class Helper(helper.HelperBase):
   """Talk over the serial port."""
 
   def __init__(self, serial_port):
-    super(Connection, self).__init__()
+    super(Helper, self).__init__()
     self._serial_port = serial_port
 
   def run(self):

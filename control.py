@@ -3,13 +3,11 @@
 import json
 import os
 import re
-import select
-import traceback
 
-import adapter.status
-import adapter.serial_port
+import helper.status
+import helper.serial_port
 
-class Control(object):
+class Control(helper.HelperLoop):
   SERIAL_PORT = '/dev/ttyUSB0'
   SERVER_URL = 'http://www:8080/'
   ADAPTER_URL = os.path.join(SERVER_URL, 'status/control')
@@ -31,23 +29,31 @@ class Control(object):
   COLOR_RE = re.compile(r'^[01], ?[01], ?[01]$')
 
   def __init__(self):
-    self.serial = None
-    self.status = None
+    super(Control, self).__init__()
 
-    # Remember if buttons are up or down.
+    # Are buttons currently pushed down?
     self.button_state = [False] * len(self.BUTTONS)
 
-    # Remember what colors we are displaying.
+    # What colors we are displaying?
     self.color_state = ['0,0,0'] * len(self.RGBS)
 
-    self.setup_connections()
+    # Create helpers for serial/status communication.
+    self.serial = helper.serial_port.Helper(self.SERIAL_PORT)
+    self.status = helper.status.Helper(self.SERVER_URL, self.ADAPTER_URL)
 
-  def setup_connections(self):
-    self.serial = adapter.serial_port.Connection(self.SERIAL_PORT)
-    self.status = adapter.status.Connection(self.SERVER_URL, self.ADAPTER_URL)
+    # Reset the adaptor values BEFORE starting helpers.
+    self.status.update(self.create_empty_components(), blocking=True)
+
+    # Register/start our helpers for the main loop.
+    self.setup_helper(self.serial, self.handle_serial_read)
+    self.setup_helper(self.status, self.handle_status_read)
+
+  def validate_color(self, color):
+    if not self.COLOR_RE.match(color):
+      raise ValueError("Bad color format.", color)
 
   def create_empty_components(self):
-    """Create an empty template for the status adapter we maintain.
+    """Create an empty template for the status helper we maintain.
 
     This really means an empty dictionary for each component. Buttons
     will have addtional values filled in remotely when they are pushed.
@@ -77,15 +83,14 @@ class Control(object):
     self.status.update(color, sub_path=sub_path)
 
   def update_serial_color(self, colors):
-    """Notify the serial component to update all component colors.
+    """Notify the serial helper to update all background colors.
 
     Args:
       colors: The new colors. ["R,G,B" where RGB are 0 or 1 (on/off)
     """
     assert len(colors) == len(self.RGBS)
     for color in colors:
-      if not self.COLOR_RE.match(color):
-        raise ValueError("Bad color format.", color)
+      self.validate_color(color)
 
     # ['1,1,1', '0,0,0', '0, 0, 0', '0, 0, 0'] -> '000:000:000:000'
     update_string = ':'.join(colors).replace(',', '').replace(' ', '')
@@ -119,15 +124,12 @@ class Control(object):
         self.status.update(None, sub_path=sub_path, revision=update['revision'])
 
         # Validate target.
-        if not self.COLOR_RE.match(target):
-          raise ValueError("Bad color format.", target)
-
+        self.validate_color(target)
         new_colors[i] = target
 
-
+    # If we aren't already using the target colors, update!
     if new_colors != self.color_state:
       self.update_serial_color(new_colors)
-
 
   def handle_serial_read(self, update):
     print "Serial: %s" % update
@@ -148,32 +150,9 @@ class Control(object):
         self.color_state[i] = updated_colors[i]
         self.update_status_color(self.RGBS[i], updated_colors[i])
 
-  def run_forever(self):
-    # Reset the adaptor values.
-    self.status.update(self.create_empty_components(), blocking=True)
-
-    # Start our connection threads.
-    self.serial.start()
-    self.status.start()
-
-    r_wait = [self.status.connection, self.serial.connection]
-
-    while True:
-      try:
-        rready, _, _ = select.select(r_wait, [], [])
-
-        if self.status.connection in rready:
-          self.handle_status_read(self.status.connection.recv())
-
-        if self.serial.connection in rready:
-          self.handle_serial_read(self.serial.connection.recv())
-      # pylint: disable=W0703
-      except Exception:
-        traceback.print_exc()
 
 def main():
-  control = Control()
-  control.run_forever()
+  Control().run_forever()
 
 
 if __name__ == "__main__":

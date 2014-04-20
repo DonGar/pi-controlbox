@@ -6,9 +6,9 @@ import time
 
 import requests
 
-import adapter
+import helper
 
-class Connection(adapter.ConnectionBase):
+class Helper(helper.HelperBase):
   """Mirror of Web API of Status structure.
 
   Process reads the full remote status struct, and communicates back updates.
@@ -17,7 +17,7 @@ class Connection(adapter.ConnectionBase):
   """
 
   def __init__(self, server_url, adapter_url):
-    super(Connection, self).__init__()
+    super(Helper, self).__init__()
     self.server_url = server_url
     self.adapter_url = adapter_url
     self._pool = multiprocessing.Pool(1)
@@ -62,6 +62,7 @@ class Connection(adapter.ConnectionBase):
           (update_url,), dict(params=params, headers=headers, data=json_value))
 
   def push_button(self, button):
+    """Helper for marking a button component pushed."""
     print "Push: %s" % button
     sub_path = os.path.join('button', button, 'pushed')
     now = int(time.time())

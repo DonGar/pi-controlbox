@@ -9,7 +9,7 @@ run:
 	python control.py 2>&1
 
 lint:
-	pylint --rcfile pylintrc *.py adapter/*.py
+	pylint --rcfile pylintrc *.py helper/*.py
 
 test:
 	python -m unittest discover
