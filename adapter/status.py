@@ -62,6 +62,7 @@ class Connection(adapter.ConnectionBase):
           (update_url,), dict(params=params, headers=headers, data=json_value))
 
   def push_button(self, button):
-    button_url = os.path.join(self.server_url, 'button', button)
-    print "Push: %s" % button_url
-    self._pool.apply_async(requests.get, (button_url,))
+    print "Push: %s" % button
+    sub_path = os.path.join('button', button, 'pushed')
+    now = int(time.time())
+    self.update(now, sub_path)
