@@ -9,8 +9,7 @@ import helper.serial_port
 
 class Control(helper.HelperLoop):
   SERIAL_PORT = '/dev/ttyUSB0'
-  SERVER_URL = 'http://www:8080/'
-  ADAPTER_URL = os.path.join(SERVER_URL, 'status/control')
+  ADAPTER_URL = 'http://www:8080/status/control'
 
   BUTTONS = ('block_2',
              'block_1',
@@ -39,7 +38,7 @@ class Control(helper.HelperLoop):
 
     # Create helpers for serial/status communication.
     self.serial = helper.serial_port.Helper(self.SERIAL_PORT)
-    self.status = helper.status.Helper(self.SERVER_URL, self.ADAPTER_URL)
+    self.status = helper.status.Helper(self.ADAPTER_URL)
 
     # Reset the adaptor values BEFORE starting helpers.
     self.status.update(self.create_empty_components(), blocking=True)

@@ -16,9 +16,8 @@ class Helper(helper.HelperBase):
   Other methods provide non-blocking ways to write to that structure.
   """
 
-  def __init__(self, server_url, adapter_url):
+  def __init__(self, adapter_url):
     super(Helper, self).__init__()
-    self.server_url = server_url
     self.adapter_url = adapter_url
     self._pool = multiprocessing.Pool(1)
 
